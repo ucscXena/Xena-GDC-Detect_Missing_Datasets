@@ -1,16 +1,16 @@
-#Project Motivation
+# Project Motivation
 
 The UCSC Xena [1] browser is an online tool that allows users to analyze and visualize different types of genomic data. This data comes from multiple sources, most importantly the Genomic Data Commons (GDC) [2]. Data from the GDC is imported into UCSC Xena through Xena-GDC-ETL[6].  The GDC has tens of projects, hundreds of datasets, and thousands of samples, all of which take considerable time and effort to import into Xena. The GDC periodically adds and updates its data but only sometimes indicates in its release notes which datasets it has updated. Programmers who run the Xena-GDC-ETL code need to know which datasets need updating and which still need to change. While there is an automated testing suite that checks every data value in the GDC and compares it to Xena, it takes a long time to run for all projects and all datasets. The goal of this project is to provide users of the Xena-GDC-ETL code with information on which project(s) and datatype(s) require updating. This will allow the Xena browser to be updated quickly after the GDC releases data and to monitor the GDC for any dataset changes.  
 
-##Background: GDC
+## Background: GDC
 
 The NCI's Genomic Data Commons (GDC) provides the cancer research community with a unified repository and cancer knowledge base that enables data sharing across cancer genomic studies in support of precision medicine. The GDC offers public access to data from important national and international cancer research projects such as The Cancer Genome Atlas (TCGA)[4], Therapeutically Applicable Research to Generate Effective Treatments (TARGET) [3], and others. This data, as well as its metadata, can be retrieved and downloaded using the GDC API’s various endpoints, such as “/cases”, “/files”, “/projects”, etc. These endpoints are used by the Xena-GDC-ETL to import data, transform the data into files compatible with the Xena browser, and transfer it to the Xena hub. The Xena hub is organized into Cohorts, each representing a project contained in the GDC. Individual cohorts also have datasets that correspond to the data types with samples imported from the GDC. 
 
-##Background: Xena API
+## Background: Xena API
 
 The Xena API [7] is a Python API that can be used to query the Xena hub. Users can use the Xena API to get metadata or data on specific samples, genes, datasets, and cohorts. This project uses the Xena API to query the sample submitter IDs that are contained in specific datasets. This way, they can be compared with those returned by the GDC.
 
-##Overview
+## Overview
 
 The objective of this project is to build a testing suite to independently verify the quantity of data between the data on the Xena data hub and the GDC portal. Specifically it will test 3 things:
 
@@ -22,15 +22,15 @@ The objective of this project is to build a testing suite to independently verif
 
 All results including missing datasets, data sets with wrong sample numbers, and missing data types are saved to a TSV file. 
 
-##Methods
+## Methods
 
-###Testing for datasets missing from the Xena data hub.
+### Testing for datasets missing from the Xena data hub.
 
 The test first requests the relevant metadata of each file in a given project using the GDC API. This metadata includes information such as “data_type”, “workflow_type”, “platform” etc which is then used to match each file to a dataset. Next, a list of all possible datasets is made for each project, noting that some projects may not have a dataset for certain data types. Then individual files from the GDC API are matched to individual datasets. The parameters for matching a file to a dataset are derived from the xena_dataset script in the Xena-GDC-ETL code. Some files may not match any dataset and are saved as missing files with their data type presented as missing. Other files have a data type of  “slide images”, “Biospecimen Supplement”, and other clinical data; they are automatically removed because these data types are not imported to the Xena hub. This way, an accurate number of samples are placed into datasets, and we can remove data sets that don’t have any samples. 
 
 Once there is a list of data sets compiled from the GDC API call, it is compared to the list of data sets returned by the Xena API. Data sets missing from the Xena API call are saved to the TSV under the column missing_datasets. 
 
-###Comparing the number of samples in the Xena data hub to the GDC.
+### Comparing the number of samples in the Xena data hub to the GDC.
 
 To check if the GDC has updated data for a specific project, the test checks for a change in the sample count in the GDC of a certain data type. This was done by comparing the number of submitter IDs in a data set compiled by a GDC API call and the number of submitter IDs in a dataset in the Xena hub compiled via a Xena API call. 
 
@@ -38,7 +38,7 @@ For mutation and copy number segment data, there are two submitter IDs associate
 
 Some projects, such as CPTAC-3 and BEATAML1.0-COHORT, do not use submitter IDs for various reasons. They instead use Case IDs and a truncated submitter ID, respectively. Thus, for these two projects, the comparison is not done with submitter IDs, but with Case IDs and a truncated submitter ID. 
 
-###Testing for changes in version and redaction of samples in the GDC.
+### Testing for changes in version and redaction of samples in the GDC.
 
 The names of each submitter ID are saved as part of the comparing samples test. When the comparison is conducted, extra submitter IDs are saved to a logging file and organized by project and data set. Submitter IDs that are missing in the Xena hub indicate that the GDC has added more samples to the dataset. Submitter IDs that are missing from the GDC indicate that the GDC has redacted certain samples from a dataset. 
 
@@ -50,7 +50,7 @@ The number of submitter IDs missing or redacted is printed on the screen. The te
 ![alt_text](images/image2.png "image_tooltip")
 
 
-###Figure 1: Example results from running the script on the command line
+### Figure 1: Example results from running the script on the command line
 
 Both images display what is printed on the command line when running the script. These images only show the projects TARGET-OS and REBC-THYR, but the code runs through all projects and prints with identical format. 
 
@@ -60,7 +60,7 @@ TARGET-OS is a project that has already been imported to the Xena hub but requir
 
 REBC-THYR has not been imported to the Xena hub. However, the script still shows which data sets would need to be imported. 
 
-##Results
+## Results
 
 The testing suite has been run on all 83 projects in the GDC with a total runtime of 366 seconds. It has already found many datasets that need updating such as 'somaticmutation_wxs', 'methylation27', 'methylation450', ‘methylation epic’, and 'somaticmutation_targeted'.  Imported projects that were found to need updating include BEATAML1.0-COHORT, CGCI-BLGSP, CGCI-HTMCP-CC, CPTAC-2, CPTAC-3, TARGET-ALL-P3, TARGET-WT, TCGA-COAD, TCGA-DLBC, TCGA-ESCA, TCGA-GBM, TCGA-HNSC, and others.
 
@@ -74,7 +74,7 @@ A more detailed look on which submitter IDs are missing from which data set can 
 
 [Missing Submitter Ids](https://drive.google.com/file/d/1QBvQUb6bK0ijkiNwnSARtMMz000rBX7K/view)
 
-##Usage instructions
+## Usage instructions
 
 To run the script on all projects in the GDC, run the file on the command line without any arguments
 
@@ -98,7 +98,7 @@ Example results:
 ![alt_text](images/image4.png "image_tooltip")
 
 
-##References
+## References
 
 [1]Goldman, M.J., Craft, B., Hastie, M. et al. Visualizing and interpreting cancer genomics data via the Xena platform. Nat Biotechnol (2020). https://doi.org/10.1038/s41587-020-0546-8
 
