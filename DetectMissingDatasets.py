@@ -1,6 +1,6 @@
 '''
 This script serves as a second form of testing code which verifies 
-that the quanitity of samples in the Xena beta release hub's datasets 
+that the quantity of samples in the Xena beta release hub's datasets 
 are accurate. The GDC will often update existing projects by adding 
 new samples or redacting innacurate ones. In the future, this program 
 can be used to determine which datasets need updates to their data. 
@@ -70,7 +70,7 @@ logging.basicConfig(filename = 'missing_submitter_ids.json', level=logging.INFO,
 timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 logging.info(f'{timestamp}')
 #######################Global###############
-#Global variables intialized here
+#Global variables initialized here
 '''
 Attributes:
 	test (string): This variable contains the project ID when 'test_mode' is True. 
@@ -80,7 +80,7 @@ Attributes:
 	Organized by project ID and dataset. Used to form logging file.
 
 	Below variables used to form TSV file. Each element represents the data for one project
-	total_MDS(list):Datasets missing from the Xena hub. 
+	total_MDS(list): Datasets missing from the Xena hub. 
 	total_CMDS (list): # of datasets missing from the Xena hub.
 	total_DSMS (list): Datasets that are missing samples.
 	total_CDSMS (list): # of datasets that are missing samples.
@@ -93,6 +93,7 @@ test_mode = False
 if len(sys.argv) > 1:
 	test_mode = True
 	test = sys.argv[1]
+
 
 project_id_list = []
 total_MDS = []
@@ -150,7 +151,7 @@ def format_to_list(responseJson):
 
 def unpeel(resJson):
 	'''
-	Removes unecessary dictionaries from the JSON-formatted dictionary returned by the GDC API.
+	Removes unnecessary dictionaries from the JSON-formatted dictionary returned by the GDC API.
 
 	All metadata is located in the dictionary corresponding to "data", and the list corresponding 
 	to "hits" within that dictionary.
@@ -177,7 +178,7 @@ def file_request(project_id, fields):
 		fields(list): A list of types of metadata that will be requested from the GDC; currently this 
 		function uses the constant 'FILE_FIELDS'.
 	returns:
-		list: A list that contains dictionaries corresponding to each files metadata. (NOT yet a list of pure metadata)
+		list: A list that contains dictionaries corresponding to each file's metadata. (NOT yet a list of pure metadata)
 
 	'''
 	fields = ",".join(fields)
@@ -426,7 +427,7 @@ def compare_samples(samples, data_set, project_id):
 		data_set(Data_set object): A data set that the function will use to get the submitter IDs of the files with.
 		project_id(string): The project ID for the project that you are comparing samples on.
 	returns:
-		boolean: This boolean returns True if the subitter IDs between the GDC and Xena are not the same.
+		boolean: This boolean returns True if the submitter IDs between the GDC and Xena are not the same.
 		list: The second variable is a list which returns the list of submitter IDs missing from the Xena side.
 		list: The third variable is a list which returns the list of submitter IDs missing from the GDC side.
 
@@ -479,7 +480,7 @@ def to_tsv(total_CMDS, total_MDS, total_CDSMS, total_DSMS, total_CMDT, total_MDT
 		total_DSMS(list): list of the datasets with incorrect sample count.
 		total_CMDT(list): list of the number of datatypes missing from the Xena hub.
 		total_MDT(list): list of the datatypes missing from the Xena hub.
-		project_id_list(list): project IDs of proejcts that were tested when this script ran
+		project_id_list(list): project IDs of projects that were tested when this script ran
 	'''
 	dataset_dict = {"#_missing_datasets": total_CMDS, 
 		"missing_datasets": total_MDS, 
@@ -508,20 +509,26 @@ def to_logging(missing_submitter_ids):
 
 def test_check(test_mode, test, project_id_list,missing_submitter_ids):
 	'''
-	This functions checks if the script is going to run one project or all proejcts.
+	This functions checks if the script is going to run one project or all projects.
 	args: 
 		test_mode(boolean): A boolean which is true when test mode is on
 		test (string): The project ID of the project that the script is being run on.
 		project_id_list(list): The list of project IDs the script will run on. 
 		missing_submitter_ids(dict): This dictionary is where all submitter IDs missing from Xena will be organized.
+	returns:
+		list: List of all project IDs the script will run through
+		dictionary: A dictionary with no values, but the keys correspond to projects.
 	'''
 
 	if test_mode:
 		project_id_list = [test]
 	else:
 		project_id_list = project_request(PROJECT_FIELDS)
-		project_id_list = format_to_list(project_id_list) 
+
+		project_id_list = format_to_list(project_id_list)
+		
 	missing_submitter_ids = {project_id: None for project_id in project_id_list}
+	return project_id_list, missing_submitter_ids
 
 
 class Data_set:
@@ -540,7 +547,7 @@ class Data_set:
 	def add_file(file):
 		files.append(file)
 class File:
-	# This class acts as a strage of metadata on a File, including its submitter_id, project_id, and metadata used to match a file to a dataset. 
+	# This class acts as a storage of metadata on a File, including its submitter_id, project_id, and metadata used to match a file to a dataset. 
 	def __init__(self, file_id, data_type, workflow_type, platform,experimental_strategy ,submitter_id, project_id):
 		self.data_type = data_type
 		self.workflow_type = workflow_type
@@ -661,8 +668,9 @@ def test_project(project_id,
 
 
 #Script runs in below lines.
-test_check(test_mode, test, project_id_list,missing_submitter_ids)
+project_id_list, missing_submitter_ids = test_check(test_mode, test, project_id_list,missing_submitter_ids)
 for project_id in project_id_list:
+	
 	test_project(project_id, missing_submitter_ids, total_CMDS,total_MDS,total_CDSMS,total_DSMS,total_CMDT,total_MDT)
 
 to_tsv(total_CMDS, total_MDS, total_CDSMS, total_DSMS, total_CMDT, total_MDT, project_id_list)
