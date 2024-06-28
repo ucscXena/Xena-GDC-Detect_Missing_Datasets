@@ -69,7 +69,7 @@ Some projects are also missing entire data sets which include these data sets: s
 Other projects are completely controlled and return no results. 
 
 Lastly, some projects have not yet been imported to the Xena hub, so the TSV file displays the datasets that need to be imported in the missing datasets column for those projects. The specifics of which project is missing which dataset can be found in this file:
-[Detect Missing datasets][https://docs.google.com/spreadsheets/d/1dEC1UtfVLHmMHTTJsrgUcqAKegEW2inE-_lW0w3okpk/edit?gid=1187925879#gid=1187925879]
+[Detect Missing datasets](https://docs.google.com/spreadsheets/d/1dEC1UtfVLHmMHTTJsrgUcqAKegEW2inE-_lW0w3okpk/edit)
 
 A more detailed look on which submitter IDs are missing from which data set can be found in the logging file created by the script: 
 
